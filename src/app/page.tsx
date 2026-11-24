@@ -133,6 +133,7 @@ export default function Home() {
 
   // Authentication state
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [authEmail, setAuthEmail] = useState("");
@@ -280,6 +281,8 @@ export default function Home() {
         }
       } catch (err) {
         console.warn("Could not check auth status:", err);
+      } finally {
+        setIsAuthChecking(false);
       }
 
       try {
@@ -1125,6 +1128,194 @@ export default function Home() {
       subtleText: "text-cyan-400/60",
     },
   }[theme];
+
+  if (isAuthChecking) {
+    return (
+      <main
+        className={`min-h-screen flex items-center justify-center transition-colors duration-300 ${themeStyles.main} relative font-sans`}
+      >
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-xl font-bold text-white shadow-xl shadow-indigo-500/30 animate-pulse">
+            <span>AI</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+            <svg
+              className="h-4 w-4 animate-spin text-indigo-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <span>Checking authentication...</span>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <main
+        className={`min-h-screen flex items-center justify-center transition-colors duration-300 ${themeStyles.main} relative overflow-hidden font-sans p-4 sm:p-6`}
+      >
+        {/* Background radial ambient lights */}
+        <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.2),rgba(255,255,255,0))]" />
+
+        <div className="relative z-10 w-full max-w-md">
+          {/* Logo & Brand Header */}
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-4 relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-2xl font-bold text-white shadow-xl shadow-indigo-500/30">
+              <span className="tracking-tight">AI</span>
+              <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-4 w-4 rounded-full bg-emerald-500 border-2 border-white" />
+              </span>
+            </div>
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              Document Q&A Assistant
+            </h1>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Multi-PDF Analysis · Deep Citations · Conversational AI
+            </p>
+          </div>
+
+          {/* Login / Signup Card */}
+          <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-2xl shadow-slate-200/50 dark:shadow-black/50 backdrop-blur-xl">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                {authMode === "login" ? "Welcome back" : "Create an account"}
+              </h2>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                {authMode === "login"
+                  ? "Please log in to access your documents and workspace."
+                  : "Sign up to start analyzing documents with AI."}
+              </p>
+            </div>
+
+            <form onSubmit={handleAuthSubmit} className="space-y-4">
+              {authError && (
+                <div className="rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900/50 p-3 text-xs font-medium text-red-600 dark:text-red-400">
+                  {authError}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={authEmail}
+                  onChange={(e) => setAuthEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/40 transition"
+                />
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Must be at least 6 characters
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isAuthLoading}
+                className="w-full mt-2 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:opacity-95 disabled:opacity-50 cursor-pointer"
+              >
+                {isAuthLoading ? (
+                  <>
+                    <svg
+                      className="h-4 w-4 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>Please wait...</span>
+                  </>
+                ) : authMode === "login" ? (
+                  "Sign In & Enter App"
+                ) : (
+                  "Create Account & Enter App"
+                )}
+              </button>
+            </form>
+
+            <div className="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4 text-center text-xs text-slate-500 dark:text-slate-400">
+              {authMode === "login" ? (
+                <>
+                  Don&apos;t have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMode("signup");
+                      setAuthError("");
+                    }}
+                    className="font-semibold text-indigo-600 hover:text-indigo-500 hover:underline"
+                  >
+                    Sign Up
+                  </button>
+                </>
+              ) : (
+                <>
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMode("login");
+                      setAuthError("");
+                    }}
+                    className="font-semibold text-indigo-600 hover:text-indigo-500 hover:underline"
+                  >
+                    Log In
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main
